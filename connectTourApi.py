@@ -25,11 +25,11 @@ def getAreaInfoId(typeId):
         request = Request(url + queryParams)
         request.get_method = lambda: 'GET'
         resource = urlopen(request)
-        response_body1 = resource.read().decode(resource.headers.get_content_charset('utf8'))
+        resp_body = resource.read().decode(resource.headers.get_content_charset('utf8'))
         
 
         # XML에서 contentid 파싱
-        xmlTree = elemTree.fromstring(response_body1).find('./body/items')
+        xmlTree = elemTree.fromstring(resp_body).find('./body/items')
         for item in xmlTree.findall('item'):
             result.append(item.find('contentid').text)
         num=num+1
@@ -57,10 +57,10 @@ def getAreaInfo(typeId):
         request = Request(url + queryParams)
         request.get_method = lambda: 'GET'
         resource = urlopen(request)
-        response_body1 = resource.read().decode(resource.headers.get_content_charset('utf8'))
+        resp_body = resource.read().decode(resource.headers.get_content_charset('utf8'))
         
         # XML에서 contentid 파싱
-        xmlTree = elemTree.fromstring(response_body1).find('./body/items')
+        xmlTree = elemTree.fromstring(resp_body).find('./body/items')
         for item in xmlTree.findall('item'):
             info = dict()
             info['contentid'] = item.find('contentid').text                            # type id
@@ -141,10 +141,10 @@ def getContentIdByXY(x, y):
     request = Request(url + queryParams)
     request.get_method = lambda: 'GET'
     resource = urlopen(request)
-    response_body1 = resource.read().decode(resource.headers.get_content_charset('utf8'))
+    resp_body = resource.read().decode(resource.headers.get_content_charset('utf8'))
     
     # XML에서 contentid 파싱
-    xmlTree = elemTree.fromstring(response_body1).find('./body/items')
+    xmlTree = elemTree.fromstring(resp_body).find('./body/items')
     for item in xmlTree.findall('item'):
         result = (item.find('contentid').text, item.find('title').text)
     return result
@@ -175,40 +175,44 @@ def getContentIdByTitle(title):
     request = Request(url + queryParams)
     request.get_method = lambda: 'GET'
     resource = urlopen(request)
-    response_body1 = resource.read().decode(resource.headers.get_content_charset('utf8'))
-    print(response_body1)
+    resp_body = resource.read().decode(resource.headers.get_content_charset('utf8'))
+    print(resp_body)
     # XML에서 contentid 파싱
-    xmlTree = elemTree.fromstring(response_body1).find('./body/items')
+    xmlTree = elemTree.fromstring(resp_body).find('./body/items')
     for item in xmlTree.findall('item'):
         result = (item.find('contentid').text, item.find('title').text)
     return result
 
 def getImages(contentId):
+    '''
+    Open API에서 이미지 url 가져오기
+    '''
 
     url = 'http://api.visitkorea.or.kr/openapi/service/rest/KorService/detailImage'
-    result = (None, None) # 반환 결과
     queryParams = '?' + urlencode({ quote_plus('ServiceKey') : os.environ.get("TOURAPI_KEY"), 
             quote_plus('pageNo') : 1, 
-            quote_plus('numOfRows') : '1', 
+            quote_plus('numOfRows') : '100', 
             quote_plus('MobileApp') : 'AppTest', 
             quote_plus('MobileOS') : 'ETC', 
-            quote_plus('contentId') : contentId
+            quote_plus('contentId') : contentId,
+            quote_plus('imageYN') : 'Y',
+            quote_plus('subImageYN') : 'Y'
             })
     request = Request(url + queryParams)
     request.get_method = lambda: 'GET'
     resource = urlopen(request)
-    response_body1 = resource.read().decode(resource.headers.get_content_charset('utf8'))
+    resp_body = resource.read().decode(resource.headers.get_content_charset('utf8'))
         
-    print("결과"+response_body1)
+    # XML에서 이미지 url 파싱
+    xmlBody = elemTree.fromstring(resp_body).find('./body')
+    size = int(xmlBody.find('totalCount').text)
+    if size == 0:
+        return
 
-        # XML에서 contentid 파싱
+    result = list()
+    xmlItems = elemTree.fromstring(resp_body).find('./body/items')
+    for item in xmlItems.findall('item'):
+        result.append(item.find('originimgurl').text)
 
-        # xmlTree = elemTree.fromstring(response_body1).find('./body/items')
-        # for item in xmlTree.findall('item'):
-        #     info = dict()
-        #     info['contentid'] = item.find('contentid').text                            # type id
-        #     info['addr1'] = item.find('addr1').text                 # 상세 주소
-        #     if item.find('firstimage') != None:
-        #         info['firstimage'] = item.find('firstimage').text   # 사진 ID
-        #     else:
-        #         info['firstimage'] = None
+    
+    return result
