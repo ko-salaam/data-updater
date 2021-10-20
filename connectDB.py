@@ -84,6 +84,16 @@ class Databases():
         
         return result
 
+    def getImgNullPlaces(self, table):
+        sql = "SELECT * FROM {} where images IS NULL".format(table)
+        try:
+            self.cursor.execute(sql)
+            result = self.cursor.fetchall()
+        except Exception as e:
+            result = "getImgNullPlaces err: " + str(e)
+        
+        return result
+
     def updateImgUrl(self, table, id, imgs):
         sql = "UPDATE {} SET images=array{}::text[] WHERE id='{}'".format(table, imgs, id)
         

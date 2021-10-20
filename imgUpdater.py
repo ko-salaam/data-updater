@@ -39,5 +39,22 @@ def getImgFromTour():
         if imgs:
             print(db.updateImgUrl(table, id, imgs))
 
+def updateImagesByKakao():
+    '''
+    KAKAO 이미지 검색 api로 image url 받아와서 DB에 저장
+    '''
+    table = "accommodation"
+    columns = db.getColumns(table)
+    phoneIndex = columns.index("phone_number")
+    addressIndex = columns.index("address")
+    idIndex = columns.index("id")
+    places = db.getImgNullPlaces(table)
+    for p in places:
+        queryWord = p[phoneIndex]
+        if not queryWord:
+            queryWord = p[addressIndex]
+
+        imgs = tourapi.getImgsFromKakao(queryWord)
+        db.updateImgUrl(table, p[idIndex], imgs)
     
-getImgFromTour()
+updateImagesByKakao()

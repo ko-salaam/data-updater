@@ -1,6 +1,8 @@
+import re
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode, quote_plus
 import os
+import json
 import xml.etree.ElementTree as elemTree
 
 def getAreaInfoId(typeId):
@@ -216,3 +218,28 @@ def getImages(contentId):
 
     
     return result
+
+
+def getImgsFromKakao(phoneNumber):
+    '''
+    kakao 이미지 검색 api로 이미지 url 받아오기
+    '''
+
+    url = 'https://dapi.kakao.com/v2/search/image'
+    queryParams = '?' + urlencode({quote_plus('query') : phoneNumber})
+    request = Request(url + queryParams)
+    request.add_header("Authorization", os.getenv("KAKAO_API_KEY"))
+    request.get_method = lambda: 'GET'
+
+    print(request.headers)
+    print(request.full_url)
+    print(request.data)
+
+    resource = urlopen(request)
+    resp_body = json.loads(resource.read().decode(resource.headers.get_content_charset('utf8')))
+
+    images = []
+    for image in resp_body["documents"]:
+        images.append(image["image_url"])
+
+    return images
