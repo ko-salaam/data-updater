@@ -56,5 +56,20 @@ def updateImagesByKakao():
 
         imgs = tourapi.getImgsFromKakao(queryWord)
         db.updateImgUrl(table, p[idIndex], imgs)
-    
-updateImagesByKakao()
+
+
+def updateXYByAddress():
+    '''
+    KAKAO 로컬 api로 DB 좌표 정보 업데이트
+    '''
+    table = "prayerroom"
+    columns = db.getColumns(table)
+    addressIndex = columns.index("address")
+    for address, id in db.getAddress(table):
+        x, y = tourapi.getXYByAddress(address)
+        if x and y:
+            db.updateXY(table, id, x, y)
+
+updateXYByAddress()
+
+

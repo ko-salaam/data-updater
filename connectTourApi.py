@@ -242,4 +242,34 @@ def getImgsFromKakao(phoneNumber):
     for image in resp_body["documents"]:
         images.append(image["image_url"])
 
-    return images
+def getXYByAddress(address):
+    '''
+    KAKAO 로컬 api & 주소로 x, y 좌표 검색하기
+    '''
+
+    address = "".join(re.split('( \d+-?\d+ )', address)[:2])
+    print(address)
+    address = address.split("(")[0]
+    print(address)
+
+    url = "https://dapi.kakao.com/v2/local/search/keyword.json"
+    queryParams = '?' + urlencode({
+        quote_plus('query') : address
+        # quote_plus('analyze_type') : "exact",
+        # quote_plus('size') : 1
+        })
+    request = Request(url + queryParams)
+    request.add_header("Authorization", os.getenv("KAKAO_API_KEY"))
+    request.get_method = lambda: 'GET'
+
+    resource = urlopen(request)
+    resp_body = json.loads(resource.read().decode(resource.headers.get_content_charset('utf8')))
+
+    print(request.headers)
+    print(request.full_url)
+    print(request.data)
+    print(request.get_full_url)
+    print(resp_body)
+    # return resp_body["documents"][0]["x"], resp_body["documents"][0]["y"]
+
+getXYByAddress("Test")

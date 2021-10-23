@@ -61,6 +61,18 @@ class Databases():
             result = (" read DB err",e)
         return result
 
+    def getAddress(self, table):
+        sql = "SELECT address, id FROM " + table
+        try:
+            print(sql)
+            self.cursor.execute(sql)
+            result = self.cursor.fetchall()
+        except Exception as e:
+            result = "get address err: " + str(e)
+            sys.exit()
+        
+        return result
+
     def getRestaurants1(self, limit, offset):
         sql = "SELECT * FROM restaurant where content_id IS NULL and muslim_friendly IS NULL LIMIT {} OFFSET {} ".format(limit, offset)
         try:
@@ -110,6 +122,19 @@ class Databases():
 
     def updateContentId(self, id, contentid):
         sql = "UPDATE restaurant SET content_id={} WHERE id={}".format(contentid, id)
+        try:
+            print(sql)
+            self.cursor.execute(sql)
+            self.db.commit()
+            result = "success to update!"
+        except Exception as e:
+            result = "update err: " + str(e)
+
+        return result
+
+
+    def updateXY(self, table, id, x, y):
+        sql = "UPDATE {} SET latitude={},longitude={} WHERE id='{}'".format(table, y, x, id)
         try:
             print(sql)
             self.cursor.execute(sql)
