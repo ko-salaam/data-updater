@@ -42,9 +42,8 @@ class Databases():
         return [desc[0] for desc in self.cursor.description]
 
     def insert(self,table,data,*column):
-        sql = "INSERT INTO {table} {column} VALUES {data}".format(table=table,column=column,data=data)
         try:
-            self.cursor.execute(sql)
-            self.db.commit()
+            self.execute("INSERT INTO {table} {column} VALUES {data}".format(table=table,column=column,data=data))
+            self.commit()
         except Exception as e :
             logging.error(e)
