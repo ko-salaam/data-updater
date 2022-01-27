@@ -41,9 +41,16 @@ class Databases():
         self.execute("SELECT * FROM {} LIMIT 0".format(table))
         return [desc[0] for desc in self.cursor.description]
 
-    def insert(self,table,data,*column):
+    def insert(self,table,data,column):
         try:
             self.execute("INSERT INTO {table} {column} VALUES {data}".format(table=table,column=column,data=data))
+            self.commit()
+        except Exception as e :
+            logging.error(e)
+
+    def update(self,table, column, value):
+        try:
+            self.execute("UPDATE {table} SET {column}={value}".format(table=table,column=column,value=value))
             self.commit()
         except Exception as e :
             logging.error(e)
