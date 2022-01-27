@@ -5,7 +5,7 @@ from urllib.parse import urlencode, quote_plus
 
 class TourApi():
     def __init__(self):
-        params = {
+        self.defaultParams = {
             "ServiceKey": os.getenv("TOURAPI_KEYEY"),
             "numOfRows": "3",
             "MobildApp": "AppTest", 
@@ -14,7 +14,7 @@ class TourApi():
 
     def setRequest(self, url, params):
         queryParams = {}
-        for p in params:
+        for p in params.update(self.defaultParams):
             queryParams[quote_plus(p)] =  params[p]
         queryParams = urlencode(queryParams).encode('ascii')
         self.request = Request(url, queryParams)
