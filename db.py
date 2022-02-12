@@ -32,25 +32,33 @@ class Databases():
 
     def execute(self,query,args={}):
         self.cursor.execute(query,args)
-        return self.cursor.fetchall()
 
     def commit(self):
-        self.cursor.commit()
+        self.db.commit()
 
     def getColumns(self, table):
         self.execute("SELECT * FROM {} LIMIT 0".format(table))
         return [desc[0] for desc in self.cursor.description]
 
-    def insert(self,table,data,column):
+    def read(self, table, columns):
         try:
-            self.execute("INSERT INTO {table} {column} VALUES {data}".format(table=table,column=column,data=data))
+            self.execute("SELECT {} FROM {}".format(columns, table))
+            return self.cursor.fetchall()
+        except Exception as e:
+            logging.error(e)
+
+    def insert(self,table,column,data):
+        try:
+            sql = "INSERT INTO {table} ({column}) VALUES ({data})".format(table=table,column=column,data=data)
+            print(sql)
+            self.execute(sql)
             self.commit()
         except Exception as e :
+            print("insert errir")
             logging.error(e)
 
     def update(self,table, column, value):
         try:
             self.execute("UPDATE {table} SET {column}={value}".format(table=table,column=column,value=value))
-            self.commit()
         except Exception as e :
             logging.error(e)
